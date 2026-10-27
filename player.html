@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ar-EG" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080d18">
+<title>مشغل الفيديو | Dorosak Plus</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111a2a;--line:#ffffff1c;--text:#f3f6ff;--muted:#9fb0cb;--blue:#4c91ff}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(70% 45% at 50% 0,#18396b55,transparent),var(--bg);color:var(--text);font:14px Cairo,system-ui,sans-serif}.wrap{width:min(1040px,calc(100% - 28px));margin:auto;padding:18px 0}.top{display:flex;align-items:center;gap:12px;margin-bottom:16px}.grow{flex:1}.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:#ffffff0b;color:var(--text);text-decoration:none;padding:9px 14px;border-radius:12px;font:700 13px Cairo;cursor:pointer}.btn:hover{background:#ffffff18}.brand{font-weight:900}.card{overflow:hidden;background:linear-gradient(155deg,#142039,#0d1627);border:1px solid var(--line);border-radius:20px;box-shadow:0 25px 80px #0005}.frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}.frame iframe,.frame video{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.info{padding:18px}.info h1{font-size:clamp(18px,3vw,25px);margin:0 0 8px}.muted{color:var(--muted)}.msg{padding:24px;text-align:center}.watermark{position:absolute;z-index:2;pointer-events:none;bottom:12px;right:12px;padding:4px 9px;border-radius:8px;background:#0009;color:#fff;font-weight:800;font-size:12px}.hide{display:none!important}
+</style></head>
+<body><main class="wrap"><header class="top"><a class="btn" href="content.html">← رجوع للمحتوى</a><div class="grow"></div><div class="brand">Dorosak Plus</div></header><section class="card"><div class="frame" id="frame"><div class="msg muted" id="status">جاري تجهيز الفيديو…</div><div class="watermark" id="watermark"></div></div><div class="info"><h1 id="title">مشغل الفيديو</h1><div class="muted">شاهد الفيديو هنا داخل الموقع</div></div></section></main>
+<script>
+(()=>{'use strict';
+const code=sessionStorage.getItem('drosak_student_code'),track=sessionStorage.getItem('drosak_student_track');
+if(!code||!track){location.replace('index.html#login');return}
+const q=new URLSearchParams(location.search),raw=q.get('url')||'',title=q.get('title')||'مشغل الفيديو',frame=document.getElementById('frame'),status=document.getElementById('status');
+document.title=title+' | Dorosak Plus';document.getElementById('title').textContent=title;document.getElementById('watermark').textContent=code;
+function youtubeId(value){if(/^[\w-]{11}$/.test(value))return value;try{const u=new URL(value),h=u.hostname.toLowerCase();if(h==='youtu.be'||h.endsWith('.youtu.be'))return u.pathname.split('/').filter(Boolean)[0]||'';if(h==='youtube.com'||h.endsWith('.youtube.com')){if(u.searchParams.get('v'))return u.searchParams.get('v');const p=u.pathname.split('/').filter(Boolean);if(['embed','shorts','live','v'].includes(p[0]))return p[1]||''}}catch(e){}return''}
+const id=youtubeId(raw);if(id){const f=document.createElement('iframe');f.title=title;f.src='https://www.youtube-nocookie.com/embed/'+encodeURIComponent(id)+'?playsinline=1&rel=0';f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';f.referrerPolicy='strict-origin-when-cross-origin';f.allowFullscreen=true;frame.replaceChild(f,status)}else{try{const u=new URL(raw,location.href);if(!/^https?:$/.test(u.protocol))throw Error();const v=document.createElement('video');v.src=u.href;v.controls=true;v.playsInline=true;v.preload='metadata';v.setAttribute('controlsList','nodownload');frame.replaceChild(v,status)}catch(e){status.textContent='رابط الفيديو غير صالح أو غير مدعوم.'}}
+})();
+</script></body></html>
