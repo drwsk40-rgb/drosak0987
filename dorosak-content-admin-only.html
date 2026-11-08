@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دروسك بلس | إدارة المحتوى</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070d19;--panel:#101c30;--line:#263a57;--text:#f4f7ff;--muted:#9eb4d4;--blue:#3478ed;--mint:#42d9b5;--red:#c94a5a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0%,#102c38,transparent 34%),var(--bg);color:var(--text);font-family:Cairo,sans-serif;padding:24px}
+.wrap{max-width:1100px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}.brand{font-size:24px;font-weight:900}.brand span{color:var(--mint)}.panel{background:linear-gradient(145deg,#132139,#0d1729);border:1px solid var(--line);border-radius:24px;padding:24px;margin:16px 0;box-shadow:0 18px 50px #0003}
+h1{font-size:27px;margin:0 0 8px}h2{font-size:21px;margin:0 0 16px}.muted,.hint{color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.field{display:flex;flex-direction:column;gap:7px}.field.full{grid-column:1/-1}label{font-weight:700;color:#c8d8f1}input,select{width:100%;background:#071020;color:white;border:1px solid #314663;border-radius:13px;padding:13px;font:inherit;outline:none}input:focus,select:focus{border-color:var(--mint)}button{border:0;border-radius:13px;padding:11px 18px;background:var(--blue);color:white;font:800 15px Cairo;cursor:pointer}button.secondary{background:#1b2b43;border:1px solid #354b6a}button.danger{background:#803044}button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.msg{margin-top:12px;color:var(--mint);font-weight:700;white-space:pre-wrap}.error,.err{color:#ff9da8}.hidden{display:none!important}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:right}th{color:var(--mint)}.empty{color:var(--muted);font-size:13px;padding:15px;text-align:center;border:1px dashed var(--line);border-radius:12px}.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}.modalbox{width:min(720px,100%);max-height:90vh;overflow:auto;background:#101c30;border:1px solid #385071;border-radius:20px;padding:22px;box-shadow:0 20px 70px #0009}
+@media(max-width:650px){body{padding:12px}.panel{padding:17px}.grid{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}h1{font-size:23px}}
+</style></head><body><main class="wrap">
+<header class="top"><div class="brand">✦ دروسك <span>بلس</span> <small style="font-size:14px;color:#9eb4d4">— إدارة المحتوى فقط</small></div><button id="logout" class="secondary hidden" onclick="logoutAdmin()">تسجيل الخروج</button></header>
+<section class="panel" id="loginPanel"><h1>دخول إدارة المحتوى</h1><p class="muted">سجّل باسم المستخدم وكلمة المرور لفتح لوحة إضافة المحتوى.</p>
+<div class="grid"><div class="field"><label>اسم المستخدم</label><input id="username" autocomplete="username" placeholder="اسم المستخدم" value="plus"></div><div class="field"><label>كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور"></div></div>
+<div class="actions"><button onclick="loginAdmin()">تسجيل الدخول</button></div><div id="loginMsg" class="msg"></div></section>
+<section id="contentPanel" class="hidden">
+<div class="panel"><h1>إضافة محتوى</h1><p class="muted">إضافة المواد والمدرسين والشهور والمحاضرات والفيديوهات للشعبة المحددة.</p>
+<div class="grid">
+<div class="field"><label>الشعبة</label><select id="track"><option value="scientific_sciences">علمي علوم</option><option value="scientific_math">علمي رياضة</option><option value="literary">أدبي</option><option value="azhar">أزهر</option><option value="baccalaureate">بكالوريا</option></select></div>
+<div class="field"><label>نوع العنصر</label><select id="kind"><option value="subject">مادة</option><option value="teacher">مدرس</option><option value="month">شهر</option><option value="lecture">محاضرة</option><option value="video">فيديو</option></select></div>
+<div class="field full" id="parentWrap"><label id="parentLabel">العنصر الأب</label><select id="parent"></select></div>
+<div class="field full"><label id="nameLabel">اسم المادة</label><input id="name" placeholder="اكتب الاسم هنا"></div>
+<div class="field" id="iconWrap"><label>أيقونة المادة (اختياري)</label><input id="icon" placeholder="مثال: 📚"></div>
+<div class="field" id="durationWrap"><label>مدة الفيديو</label><input id="duration" placeholder="مثال: 45:30"></div>
+<div class="field full" id="urlWrap"><label>رابط الفيديو</label><input id="videoUrl" type="url" placeholder="https://..."></div>
+<div class="field full" id="imageWrap"><label>رابط الصورة (اختياري)</label><input id="imageUrl" type="url" placeholder="https://..."></div>
+</div><div class="actions"><button id="addBtn">حفظ وإضافة</button><button class="secondary" id="refreshBtn">تحديث القوائم</button></div><div id="appStatus" class="msg"></div>
+<p class="hint">أضف العناصر بالترتيب: مادة ← مدرس ← شهر ← محاضرة ← فيديو. بعد الحفظ تظل اختياراتك الحالية محفوظة لتسهيل إضافة العنصر التالي.</p></div>
+<div class="panel"><h2>المحتوى الموجود — جدول التعديل والترتيب</h2><div class="grid">
+<div class="field"><label>الشعبة</label><select id="listTrack"><option value="scientific_sciences">علمي علوم</option><option value="scientific_math">علمي رياضة</option><option value="literary">أدبي</option><option value="azhar">أزهر</option><option value="baccalaureate">بكالوريا</option></select></div>
+<div class="field"><label>عرض مستوى</label><select id="listKind"><option value="subjects">المواد</option><option value="teachers">المدرسون</option><option value="months">الشهور</option><option value="lectures">المحاضرات</option><option value="videos">الفيديوهات</option></select></div>
+<div class="field full" id="listParentWrap"><label>تحديد مكان المحتوى</label><div id="listParents" class="grid"></div></div></div>
+<div id="itemsList" style="margin-top:12px"><div class="empty">اختر الشعبة والمستوى لعرض المحتوى.</div></div></div>
+</section>
+<div id="contentEditModal" class="modal hidden"><div class="modalbox"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><h2>تعديل المحتوى ونقله</h2><button class="secondary" onclick="closeContentEdit()">إغلاق</button></div>
+<div class="grid"><div class="field"><label>الشعبة</label><select id="editTrack"></select></div><div class="field"><label>الاسم</label><input id="editName"></div>
+<div class="field full" id="editParents"></div><div class="field"><label>رابط الصورة</label><input id="editImage"></div><div class="field"><label>الأيقونة</label><input id="editIcon"></div><div class="field"><label>مدة الفيديو</label><input id="editDuration"></div><div class="field full"><label>رابط الفيديو</label><input id="editUrl"></div></div>
+<div id="editContentStatus" class="msg"></div><div class="actions"><button onclick="saveContentEdit()">حفظ التعديل</button><button class="secondary" onclick="closeContentEdit()">إلغاء</button></div></div></div>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+const authApp=firebase.initializeApp({apiKey:"AIzaSyBfc0ug0Es6GUI7FWqblqEqk_c8lU5Sf-k",authDomain:"plus-f09b5.firebaseapp.com",databaseURL:"https://plus-f09b5-default-rtdb.firebaseio.com",projectId:"plus-f09b5",storageBucket:"plus-f09b5.firebasestorage.app",messagingSenderId:"134730979955",appId:"1:134730979955:web:f2cf35b41460003535a806",measurementId:"G-JYNQ5QNWE6"});
+const adminAuth=authApp.auth();const ADMIN_USER="plus",ADMIN_EMAIL="plus@admin.dorosak.com";
+function loginAdmin(){const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;if(u!==ADMIN_USER||!p){document.getElementById('loginMsg').textContent='اسم المستخدم أو كلمة المرور غير صحيحة.';return}document.getElementById('loginMsg').textContent='جارٍ تسجيل الدخول...';adminAuth.signInWithEmailAndPassword(ADMIN_EMAIL,p).catch(e=>document.getElementById('loginMsg').textContent='تعذر تسجيل الدخول: '+(e.code==='auth/invalid-credential'?'تحقق من كلمة المرور.':e.message));}
+function logoutAdmin(){adminAuth.signOut()}
+adminAuth.onAuthStateChanged(user=>{document.getElementById('loginPanel').classList.toggle('hidden',!!user);document.getElementById('contentPanel').classList.toggle('hidden',!user);document.getElementById('logout').classList.toggle('hidden',!user);if(user&&window.initContentAdmin)window.initContentAdmin()});
+</script><script>(function(){
+const DB_URL="https://shap-f0fde-default-rtdb.firebaseio.com";
+const $=id=>document.getElementById(id);
+const tracks={scientific_sciences:"علمي علوم",scientific_math:"علمي رياضة",literary:"أدبي",azhar:"أزهر",baccalaureate:"بكالوريا"};
+const levels={subjects:"المواد",teachers:"المدرسون",months:"الشهور",lectures:"المحاضرات",videos:"الفيديوهات"};
+const kindPath={subject:"subjects",teacher:"teachers",month:"months",lecture:"lectures",video:"videos"};
+let currentRows=[],currentPath="",editState=null,formSelections={};
+function status(id,text,ok=false){const e=$(id);e.textContent=text;e.className="msg "+(ok?"":"error")}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function clean(p){return String(p||"").replace(/^\/+|\/+$/g,"")}
+function api(path){return `${DB_URL}/${clean(path)}.json`}
+async function get(path){const r=await fetch(api(path));if(!r.ok)throw Error("Firebase HTTP "+r.status);return (await r.json())||{}}
+async function put(path,value){const r=await fetch(api(path),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)});if(!r.ok)throw Error("Firebase HTTP "+r.status);return r.json()}
+async function patch(path,value){const r=await fetch(api(path),{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify(value)});if(!r.ok)throw Error("Firebase HTTP "+r.status);return r.json()}
+async function del(path){const r=await fetch(api(path),{method:"DELETE"});if(!r.ok)throw Error("Firebase HTTP "+r.status)}
+function entries(obj){return Object.entries(obj||{}).map(([key,val])=>({key,...val})).sort((a,b)=>(Number(a.order??1e12)-Number(b.order??1e12))||(Number(a.createdAt||0)-Number(b.createdAt||0)))}
+function fill(sel,items,placeholder,keep=true){const old=keep?sel.value:"";sel.innerHTML="";sel.add(new Option(placeholder,""));items.forEach(x=>sel.add(new Option(x.name,x.key)));if(items.some(x=>x.key===old))sel.value=old}
+async function children(path){return entries(await get(path)).filter(x=>x&&x.name)}
+function setStatus(t,ok=true){$("appStatus").textContent=t;$("appStatus").className="status "+(ok?"ok":"err")}
+function formKey(){return $("track").value+"|"+$("kind").value}
+async function buildFormParents(){
+ const kind=$("kind").value,track=$("track").value,wrap=$("parentWrap");
+ if(kind==="subject"){wrap.classList.add("hidden");return}
+ wrap.classList.remove("hidden");
+ const old=formSelections[formKey()]||{};
+ wrap.innerHTML="";
+ const add=async(label,items,key,onchange)=>{const box=document.createElement("div");box.className="field";const l=document.createElement("label");l.textContent=label;const sel=document.createElement("select");sel.add(new Option("اختر "+label,""));items.forEach(x=>sel.add(new Option(x.name,x.key)));box.append(l,sel);wrap.append(box);if(items.some(x=>x.key===old[key]))sel.value=old[key];sel.onchange=async()=>{formSelections[formKey()]={...formSelections[formKey()],[key]:sel.value};await buildFormParents()};return sel};
+ const subjects=await children(`content/${track}/subjects`),sub=await add("المادة",subjects,"subject");
+ if(!sub.value)return;
+ if(kind==="teacher")return;
+ const teachers=await children(`content/${track}/subjects/${sub.value}/teachers`),teacher=await add("المدرس",teachers,"teacher");
+ if(!teacher.value)return;
+ if(kind==="month")return;
+ const months=await children(`content/${track}/subjects/${sub.value}/teachers/${teacher.value}/months`),month=await add("الشهر",months,"month");
+ if(!month.value)return;
+ if(kind==="lecture")return;
+ const lectures=await children(`content/${track}/subjects/${sub.value}/teachers/${teacher.value}/months/${month.value}/lectures`);
+ await add("المحاضرة",lectures,"lecture");
+}
+function parentPathFromForm(){
+ const kind=$("kind").value,track=$("track").value,sel=[...$("parentWrap").querySelectorAll("select")].map(x=>x.value);
+ if(kind==="subject")return `content/${track}/subjects`;
+ if(!sel[0])throw Error("اختار المادة");
+ if(kind==="teacher")return `content/${track}/subjects/${sel[0]}/teachers`;
+ if(!sel[1])throw Error("اختار المدرس");
+ if(kind==="month")return `content/${track}/subjects/${sel[0]}/teachers/${sel[1]}/months`;
+ if(!sel[2])throw Error("اختار الشهر");
+ if(kind==="lecture")return `content/${track}/subjects/${sel[0]}/teachers/${sel[1]}/months/${sel[2]}/lectures`;
+ if(!sel[3])throw Error("اختار المحاضرة");
+ return `content/${track}/subjects/${sel[0]}/teachers/${sel[1]}/months/${sel[2]}/lectures/${sel[3]}/videos`;
+}
+async function updateForm(){
+ const k=$("kind").value;
+ $("nameLabel").textContent=({subject:"اسم المادة",teacher:"اسم المدرس",month:"اسم الشهر",lecture:"اسم المحاضرة",video:"اسم الفيديو"})[k];
+ $("iconWrap").classList.toggle("hidden",k!=="subject");
+ $("durationWrap").classList.toggle("hidden",k!=="video");
+ $("urlWrap").classList.toggle("hidden",k!=="video");
+ await buildFormParents();
+}
+async function addItem(){
+ try{
+ const kind=$("kind").value,name=$("name").value.trim();if(!name)throw Error("اكتب الاسم");
+ const path=parentPathFromForm(),siblings=await get(path),maxOrder=Math.max(-1,...Object.values(siblings||{}).map(x=>Number(x?.order??-1)));
+ const item={name,createdAt:Date.now(),order:maxOrder+1};
+ if(kind==="subject")item.icon=$("icon").value.trim()||"📚";
+ if($("imageUrl").value.trim())item.image=$("imageUrl").value.trim();
+ if(kind==="video"){item.duration=$("duration").value.trim();item.url=$("videoUrl").value.trim();if(!item.url)throw Error("اكتب رابط الفيديو")}
+ const r=await fetch(api(path),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)});if(!r.ok)throw Error("Firebase HTTP "+r.status);
+ $("name").value="";$("icon").value="";$("imageUrl").value="";$("duration").value="";$("videoUrl").value="";
+ setStatus("تمت الإضافة بنجاح. تم الاحتفاظ باختيارات الشعبة والعناصر الأب.",true);
+ await renderList();
+ }catch(e){setStatus(e.message||String(e),false)}
+}
+$("addBtn").onclick=addItem;
+$("kind").onchange=updateForm;$("track").onchange=()=>{formSelections={};updateForm()};
+$("refreshBtn").onclick=async()=>{await updateForm();await renderList()};
+$("listTrack").onchange=renderList;$("listKind").onchange=renderList;
+function listLevels(){return $("listKind").value}
+async function buildListParents(){
+ const kind=listLevels(),track=$("listTrack").value,wrap=$("listParents");wrap.innerHTML="";
+ if(kind==="subjects"){currentPath=`content/${track}/subjects`;return}
+ const chain=[["المادة",`content/${track}/subjects`]];
+ const subjects=await children(chain[0][1]);let selected=[];
+ const addSel=async(label,items,depth)=>{const box=document.createElement("div");box.className="field";box.innerHTML=`<label>${label}</label>`;const sel=document.createElement("select");sel.add(new Option("اختر "+label,""));items.forEach(x=>sel.add(new Option(x.name,x.key)));box.append(sel);wrap.append(box);if(items.length){sel.value=items[0].key;selected[depth]=sel.value}sel.onchange=()=>renderList();return sel};
+ const sub=await addSel("المادة",subjects,0);if(!sub.value)return;
+ let path=`content/${track}/subjects/${sub.value}`;
+ if(kind==="teachers"){currentPath=path+"/teachers";return}
+ const teachers=await children(path+"/teachers"),teacher=await addSel("المدرس",teachers,1);if(!teacher.value)return;
+ path+="/"+teacher.value;
+ if(kind==="months"){currentPath=path+"/months";return}
+ const months=await children(path+"/months"),month=await addSel("الشهر",months,2);if(!month.value)return;
+ path+="/"+month.value;
+ if(kind==="lectures"){currentPath=path+"/lectures";return}
+ const lectures=await children(path+"/lectures"),lecture=await addSel("المحاضرة",lectures,3);if(!lecture.value)return;
+ currentPath=path+"/"+lecture.value+"/videos";
+}
+async function renderList(){
+ try{
+ const kind=listLevels(),track=$("listTrack").value,container=$("itemsList");
+ if(kind==="subjects")currentPath=`content/${track}/subjects`;
+ else await buildListParents();
+ const data=await children(currentPath);currentRows=data;
+ if(!data.length){container.innerHTML='<div class="empty">لا يوجد محتوى في هذا المستوى.</div>';return}
+ container.innerHTML=`<div class="tablewrap"><table><thead><tr><th>الترتيب</th><th>الاسم</th><th>تفاصيل</th><th>إجراءات</th></tr></thead><tbody>${data.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.name)}</td><td>${esc(x.duration||"")} ${x.url?" • فيديو":""} ${x.image?" • صورة":""}</td><td><button class="secondary" onclick="moveContent(${i},-1)" ${i===0?"disabled":""}>↑</button> <button class="secondary" onclick="moveContent(${i},1)" ${i===data.length-1?"disabled":""}>↓</button> <button class="secondary" onclick="openContentEdit(${i})">تعديل</button> <button class="danger" onclick="deleteContent(${i})">حذف</button></td></tr>`).join("")}</tbody></table></div>`;
+ }catch(e){$("itemsList").innerHTML=`<div class="empty">تعذر تحميل المحتوى: ${esc(e.message)}</div>`}
+}
+async function moveContent(i,dir){
+ const j=i+dir;if(j<0||j>=currentRows.length)return;
+ try{const rows=[...currentRows];[rows[i],rows[j]]=[rows[j],rows[i]];const obj={};rows.forEach((x,index)=>{const {key,...value}=x;value.order=index;obj[key]=value});await put(currentPath,obj);await renderList();setStatus("تم تغيير الترتيب وحفظه. سيظهر للطالب بعد تحديث ترتيب صفحة الطالب.",true)}catch(e){setStatus("تعذر تغيير الترتيب: "+e.message,false)}
+}
+async function deleteContent(i){if(!confirm("تأكيد حذف العنصر؟"))return;try{await del(currentPath+"/"+currentRows[i].key);await renderList();setStatus("تم الحذف",true)}catch(e){setStatus(e.message,false)}}
+function makeTargetSelectors(containerId,track,kind,initial={}){
+ const container=$(containerId);container.innerHTML="";
+ const levelsNeeded=kind==="teacher"?["subject"]:kind==="month"?["subject","teacher"]:kind==="lecture"?["subject","teacher","month"]:kind==="video"?["subject","teacher","month","lecture"]:[];
+ return (async()=>{
+ let path=`content/${track}/subjects`,values=[];
+ const create=async(label,items,depth)=>{const box=document.createElement("div");box.className="field";box.innerHTML=`<label>${label}</label>`;const sel=document.createElement("select");sel.add(new Option("اختر "+label,""));items.forEach(x=>sel.add(new Option(x.name,x.key)));box.append(sel);container.append(box);if(items.some(x=>x.key===initial[depth]))sel.value=initial[depth];if(!sel.value&&items.length)sel.value=items[0].key;values[depth]=sel.value;sel.onchange=()=>makeTargetSelectors(containerId,track,kind,Object.fromEntries([...container.querySelectorAll("select")].map((z,i)=>[i,z.value])));return sel};
+ const subs=await children(path),sub=await create("المادة",subs,0);if(!sub.value)return values;
+ path+=`/${sub.value}/teachers`;if(kind==="teacher")return values;
+ const teachers=await children(path),teacher=await create("المدرس",teachers,1);if(!teacher.value)return values;
+ path+=`/${teacher.value}/months`;if(kind==="month")return values;
+ const months=await children(path),month=await create("الشهر",months,2);if(!month.value)return values;
+ path+=`/${month.value}/lectures`;if(kind==="lecture")return values;
+ const lectures=await children(path);await create("المحاضرة",lectures,3);return values;
+ })();
+}
+let editDestination={};
+window.openContentEdit=async i=>{
+ const x=currentRows[i],kind=listLevels(),track=$("listTrack").value;
+ editState={...x,oldPath:currentPath,kind,track};
+ $("editTrack").innerHTML=Object.entries(tracks).map(([k,n])=>`<option value="${k}">${n}</option>`).join("");$("editTrack").value=track;
+ $("editName").value=x.name||"";$("editImage").value=x.image||"";$("editIcon").value=x.icon||"";$("editDuration").value=x.duration||"";$("editUrl").value=x.url||"";
+ const parts=currentPath.split("/");let initial={};
+ if(kind!=="subjects"){initial[0]=parts[3];if(parts.length>5)initial[1]=parts[5];if(parts.length>7)initial[2]=parts[7];if(parts.length>9)initial[3]=parts[9]}
+ const kindSingular={subjects:"subject",teachers:"teacher",months:"month",lectures:"lecture",videos:"video"}[kind];
+ await makeTargetSelectors("editParents",track,kindSingular,initial);
+ $("editTrack").onchange=()=>makeTargetSelectors("editParents",$("editTrack").value,kindSingular,{});
+ $("contentEditModal").classList.remove("hidden");
+};
+window.closeContentEdit=()=>$("contentEditModal").classList.add("hidden");
+window.saveContentEdit=async()=>{
+ try{
+ if(!editState)throw Error("لا يوجد عنصر محدد");
+ const name=$("editName").value.trim();if(!name)throw Error("اكتب الاسم");
+ const kind=editState.kind,track=$("editTrack").value,sel=[...$("editParents").querySelectorAll("select")].map(x=>x.value);
+ let target;
+ if(kind==="subjects")target=`content/${track}/subjects`;
+ else{
+  if(!sel[0])throw Error("اختر المادة");
+  target=`content/${track}/subjects/${sel[0]}`;
+  if(kind!=="teachers"){if(!sel[1])throw Error("اختر المدرس");target+=`/teachers/${sel[1]}`}
+  if(["months","lectures","videos"].includes(kind)){if(!sel[2])throw Error("اختر الشهر");target+=`/months/${sel[2]}`}
+  if(["lectures","videos"].includes(kind)){if(kind==="videos"||kind==="lectures"){if(kind==="videos"&&!sel[3])throw Error("اختر المحاضرة");if(kind==="lectures")target+="/lectures";else target+=`/lectures/${sel[3]}/videos`}} 
+  if(kind==="teachers")target+="/teachers";
+  if(kind==="months")target+="/months";
+ }
+ const payload={...editState,name,image:$("editImage").value.trim()||null,icon:$("editIcon").value.trim()||null,duration:$("editDuration").value.trim()||null,url:$("editUrl").value.trim()||null,updatedAt:Date.now()};
+ delete payload.key;delete payload.oldPath;delete payload.kind;delete payload.track;
+ if(target===editState.oldPath){await patch(target+"/"+editState.key,payload)}
+ else{const siblings=await get(target),key=editState.key;await put(target+"/"+key,payload);await del(editState.oldPath+"/"+key)}
+ closeContentEdit();await renderList();setStatus("تم حفظ التعديلات ونقل العنصر إذا تغيّر مكانه.",true);
+ }catch(e){$("editContentStatus").textContent=e.message;status("editContentStatus",e.message,false)}
+};
+window.moveContent=moveContent;window.deleteContent=deleteContent;
+window.initContentAdmin=async()=>{await updateForm();await renderList()};
+})();
+</script></body></html>
